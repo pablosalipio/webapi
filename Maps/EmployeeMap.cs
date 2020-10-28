@@ -1,9 +1,9 @@
-﻿using WebApi.Models;
+﻿using webapi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-namespace WebApi.Maps
+namespace webapi.Maps
 {
 
     public class EmployeeMap

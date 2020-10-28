@@ -4,9 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Models;
+using webapi.Models;
 
-namespace WebApi
+namespace webapi
 {
     public class Startup
     {

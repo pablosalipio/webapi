@@ -1,6 +1,6 @@
 using System;
 
-namespace WebApi
+namespace webapi
 {
     public class Employee
     {

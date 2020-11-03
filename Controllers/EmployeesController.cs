@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Models;
+using webapi.Services;
 
 namespace webapi.Controllers
 {
@@ -14,18 +15,11 @@ namespace webapi.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly EmployeeContext _context;
+        private EmployeeService service;
 
         public EmployeesController(EmployeeContext context)
         {
-            _context = context;
-        }
-
-        // GET: api/Employees
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
-        {
-            return await _context.Employees.ToListAsync();
+            service = new EmployeeService(context);
         }
 
         // GET: api/Employees/5
@@ -33,39 +27,52 @@ namespace webapi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await service.GetEmployee(id);
 
-            if (employee == null)
+            if (ModelState.IsValid && employee != null)
             {
-                return NotFound();
+                return employee;
             }
-
-            return employee;
+            else
+            {
+                ModelState.AddModelError("ID", "Não foi encontrado funcionario com o ID informado.");
+                return BadRequest(ModelState);
+            }
         }
 
         // POST: api/Employees
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // incluir funcionario
+        // utiliza a classe Employee, validação pode ser consultada na classe EmployeeService
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+            if (service.EmployeeExists(employee.Doc))
+            {
+                ModelState.AddModelError("Doc", "Já existe funcionario com o mesmo cpf cadastrado.");
+                return BadRequest(ModelState);
+            }
+
+            if (ModelState.IsValid)
+            {
+                service.PostEmployee(employee);
+                await service.Save();
+            }
 
             return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
 
         // GET: api/Employees/5
         // retorna o extrato salarial do funcionario
-        [HttpGet("Paycheck/{id}")]
+        [HttpGet("paycheck/{id}")]
         public async Task<ActionResult<Paycheck>> PayCheck(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            var paycheck = new PaycheckController();
+            Employee employee = await service.GetEmployee(id);
+            var paycheck = new PaycheckController();   
 
-            if (employee == null)
+            if (employee == null || !ModelState.IsValid)
             {
-                return NotFound();
+                ModelState.AddModelError("ID", "Não foi encontrado funcionario com o ID informado.");
+                return BadRequest(ModelState);
             }
             else
             {
@@ -73,9 +80,6 @@ namespace webapi.Controllers
             }
         }
 
-        private bool EmployeeExists(int id)
-        {
-            return _context.Employees.Any(e => e.Id == id);
-        }
+        
     }
 }

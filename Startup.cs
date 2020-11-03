@@ -5,6 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using webapi.Models;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using System.Globalization;
+using webapi.Services;
 
 namespace webapi
 {
@@ -13,6 +17,8 @@ namespace webapi
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
         }
 
         public IConfiguration Configuration { get; }
@@ -22,7 +28,8 @@ namespace webapi
         {
             services.AddDbContext<EmployeeContext>(options =>
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddControllers();
+            services.AddControllers().AddFluentValidation();
+            services.AddTransient<IValidator<Employee>, EmployeeValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

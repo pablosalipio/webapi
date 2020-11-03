@@ -43,7 +43,7 @@ namespace webapi.Controllers
                 listEntry.Add(entry);
                 totalDis += irrf;
             }
-            if(employee.HealthPlan)
+            if(employee.HealthPlan == true)
             {
                 Entry entry = new Entry();
                 entry.Type = "Desconto";
@@ -52,7 +52,7 @@ namespace webapi.Controllers
                 listEntry.Add(entry);
                 totalDis += 10;
             }
-            if (employee.DentalPlan)
+            if (employee.DentalPlan == true)
             {
                 Entry entry = new Entry();
                 entry.Type = "Desconto";
@@ -62,8 +62,7 @@ namespace webapi.Controllers
                 totalDis += 5;
             }
 
-             
-            if (employee.Transport && employee.Salary > 1500)
+            if (employee.Transport == true && employee.Salary > 1500)
             {
                 transport = ((double)8 / 100) * employee.Salary;
                 Entry entry = new Entry();

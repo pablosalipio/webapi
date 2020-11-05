@@ -1,111 +1,144 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApi;
-using WebApi.Models;
+using webapi.Models;
+using webapi.Services;
+using webapi.Services.Validator;
 
-namespace WebApi.Controllers
+namespace webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly EmployeeContext _context;
+        private readonly IEmployeeService service;
 
-        public EmployeesController(EmployeeContext context)
+        public EmployeesController(IEmployeeService service)
         {
-            _context = context;
+            this.service = service;
+            //service = new EmployeeService(context);
+
         }
 
-        // GET: api/Employees
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
-        {
-            return await _context.Employees.ToListAsync();
-        }
-
-        // GET: api/Employees/5
+        // GET: api/employees/{id}
+        /// <summary>
+        /// Retorna as informações do funcionário com o {id} informado.
+        /// </summary>
+        /// <param name="Id">Id do funcionario</param>
         [HttpGet("{id}")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await service.GetEmployee(id).ConfigureAwait(false);
 
-            if (employee == null)
+            if (ModelState.IsValid && employee != null)
             {
-                return NotFound();
+                return employee;
             }
+            else
+            {
+                var objectReturn = new ObjectResult(404);
+                ErrorReturn result = new ErrorReturn();
+                List<EmployeeError> listError = new List<EmployeeError>();
+                EmployeeError error = new EmployeeError();
+                error.error = "Nao foi encontrado funcionario com o ID informado.";
+                listError.Add(error);
 
-            return employee;
+                result.title = "One or more validation errors occurred.";
+                result.status = 404;
+                result.errors = listError;
+
+                var jsonString = JsonSerializer.Serialize(result);
+                objectReturn.Value = jsonString;
+                return objectReturn;
+            }
         }
 
-        // PUT: api/Employees/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmployee(int id, Employee employee)
-        {
-            if (id != employee.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(employee).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EmployeeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Employees
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // POST: api/employees
+        /// <summary>
+        /// Permite inserir funcionário no banco de dados.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     POST api/employees
+        ///     {        
+        ///        "eName": "Primeiro nome",
+        ///        "LastName": "Sobrenome",
+        ///        "Doc": "62513589556",
+        ///        "Sector": "Setor",
+        ///        "Salary": 2000.00,
+        ///        "DtAdmission": "2020-11-03",
+        ///        "HealthPlan": true,
+        ///        "DentalPlan": true,
+        ///        "Transport": true        
+        ///     }
+        /// </remarks>
+        /// <param name="employee"></param>     
         [HttpPost]
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-
-            //return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
-            return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, employee);
-        }
-
-        // DELETE: api/Employees/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Employee>> DeleteEmployee(int id)
-        {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null)
+            if (await service.EmployeeExists(employee.Doc).ConfigureAwait(false))
             {
-                return NotFound();
+                var objectReturn = new ObjectResult(409);
+                ErrorReturn result = new ErrorReturn();
+                List<EmployeeError> listError = new List<EmployeeError>();
+                EmployeeError error = new EmployeeError();
+                error.error = "Ja existe funcionario com o CPF informado.";
+                listError.Add(error);
+
+                result.title = "One or more validation errors occurred.";
+                result.status = 409;
+                result.errors = listError;
+
+                var jsonString = JsonSerializer.Serialize(result);
+                objectReturn.Value = jsonString;
+                return objectReturn;
             }
 
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            if (ModelState.IsValid)
+            {
+                service.PostEmployee(employee);
+                await service.Save();
+            }
 
-            return employee;
+            return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
 
-        private bool EmployeeExists(int id)
+        // GET: api/employees/{id}
+        /// <summary>
+        /// Retorna o extrato salarial do funcionário com o {id} informado.
+        /// </summary>
+        /// <param name="Id">Id do funcionario</param>
+        [HttpGet("paycheck/{id}")]
+        public async Task<ActionResult<Paycheck>> PayCheck(int id)
         {
-            return _context.Employees.Any(e => e.Id == id);
+            Employee employee = await service.GetEmployee(id).ConfigureAwait(false);
+            var paycheck = new PaycheckController();
+
+            if (employee == null || !ModelState.IsValid)
+            {
+                var objectReturn = new ObjectResult(404);
+                ErrorReturn result = new ErrorReturn();
+                List<EmployeeError> listError = new List<EmployeeError>();
+                EmployeeError error = new EmployeeError();
+                error.error = "Nao foi encontrado funcionario com o ID informado.";
+                listError.Add(error);
+
+                result.title = "One or more validation errors occurred.";
+                result.status = 404;
+                result.errors = listError;
+
+                var jsonString = JsonSerializer.Serialize(result);
+                objectReturn.Value = jsonString;
+                return objectReturn;
+            }
+            else
+            {
+                return paycheck.PaycheckGet(employee);
+            }
         }
+
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApi.Maps;
+using webapi.Maps;
 
-namespace WebApi.Models
+namespace webapi.Models
 {
     public class EmployeeContext : DbContext
     {

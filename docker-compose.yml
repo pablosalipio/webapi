@@ -8,23 +8,22 @@ services:
       POSTGRES_PASSWORD: "stone"
       POSTGRES_DB: "stonedb"
     ports:
-      - "15432:5432"
+      - "5432"
     restart: always
     volumes:
-      - /c/git/webapi/webapi/database
-      - ./database/seed.sql :/docker-entrypoint-initdb.d/seed.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/seed.sql
     networks:
       - postgres-compose-network
       
-  pgadmin-compose:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "pabloalipio.one@gmail.com"
-      PGADMIN_DEFAULT_PASSWORD: "stone"
-    ports:
-      - "16543:80"
+  webapi:
+    image: webapi:latest
     depends_on:
-      - postgres-compose
+      - "postgres-compose"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"     
     networks:
       - postgres-compose-network
 

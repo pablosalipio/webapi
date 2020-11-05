@@ -1,6 +1,6 @@
 using System;
 
-namespace WebApi
+namespace webapi
 {
     public class Employee
     {
@@ -11,8 +11,8 @@ namespace WebApi
         public string Sector { get; set; }
         public double Salary { get; set; }
         public DateTime DtAdmission { get; set; }
-        public bool HealthPlan { get; set; }
-        public bool DentalPlan { get; set; }
-        public bool Transport { get; set; }
+        public Nullable<bool> HealthPlan { get; set; }
+        public Nullable<bool> DentalPlan { get; set; }
+        public Nullable<bool> Transport { get; set; }
     }
 }

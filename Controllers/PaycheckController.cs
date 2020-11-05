@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using webapi;
-using System.Text.Json;
-using webapi.Models;
 using System.Globalization;
+using webapi.Models;
 
 namespace webapi.Controllers
 {
@@ -43,7 +39,7 @@ namespace webapi.Controllers
                 listEntry.Add(entry);
                 totalDis += irrf;
             }
-            if(employee.HealthPlan == true)
+            if (employee.HealthPlan == true)
             {
                 Entry entry = new Entry();
                 entry.Type = "Desconto";
@@ -88,7 +84,7 @@ namespace webapi.Controllers
             paycheck.Month = month;
             paycheck.Entrys = listEntry;
             paycheck.GrossSalary = Math.Round(employee.Salary, 2);
-            paycheck.TotalDiscount = Math.Round(totalDis, 2);
+            paycheck.TotalDiscount = Math.Round(totalDis, 2) * -1;
             paycheck.NetSalary = Math.Round(netSalary, 2);
 
             return paycheck;
@@ -97,22 +93,22 @@ namespace webapi.Controllers
         //retorna a porcentagem de desconto do INSS de acordo com o salario informado
         public double getInss(double salary)
         {
-            if( salary <= 1045)
+            if (salary <= 1045)
             {
                 return ((double)7.5 / 100) * salary;
-            } 
-            else if( salary >= 1045.01 && salary <= 2089.60)
+            }
+            else if (salary >= 1045.01 && salary <= 2089.60)
             {
                 return ((double)9 / 100) * salary;
-            } 
+            }
             else if (salary >= 2089.61 && salary <= 3134.40)
             {
                 return ((double)12 / 100) * salary;
-            } 
+            }
             else if (salary >= 3134.41 && salary <= 6101.06)
             {
                 return ((double)14 / 100) * salary;
-            } 
+            }
             else
             {
                 return 0;
@@ -138,7 +134,7 @@ namespace webapi.Controllers
                 irrf = ((double)15 / 100) * salary;
                 limit = 354.80;
             }
-            else if (salary >= 3751.06  && salary <= 4664.68)
+            else if (salary >= 3751.06 && salary <= 4664.68)
             {
                 irrf = ((double)22.5 / 100) * salary;
                 limit = 636.36;

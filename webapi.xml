@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>webapi</name>
+    </assembly>
+    <members>
+        <member name="M:webapi.Controllers.EmployeesController.GetEmployee(System.Int32)">
+            <summary>
+            Retorna as informações do funcionário com o {id} informado.
+            </summary>
+            <param name="Id">Id do funcionario</param>
+        </member>
+        <member name="M:webapi.Controllers.EmployeesController.PostEmployee(webapi.Employee)">
+            <summary>
+            Permite inserir funcionário no banco de dados.
+            </summary>
+            <remarks>
+            Sample request:
+            
+                POST api/employees
+                {        
+                   "eName": "Primeiro nome",
+                   "LastName": "Sobrenome",
+                   "Doc": "62513589556",
+                   "Sector": "Setor",
+                   "Salary": 2000.00,
+                   "DtAdmission": "2020-11-03",
+                   "HealthPlan": true,
+                   "DentalPlan": true,
+                   "Transport": true        
+                }
+            </remarks>
+            <param name="employee"></param>     
+        </member>
+        <member name="M:webapi.Controllers.EmployeesController.PayCheck(System.Int32)">
+            <summary>
+            Retorna o extrato salarial do funcionário com o {id} informado.
+            </summary>
+            <param name="Id">Id do funcionario</param>
+        </member>
+    </members>
+</doc>

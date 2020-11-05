@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace webapi.Models
 {
@@ -13,12 +9,5 @@ namespace webapi.Models
         public double GrossSalary { get; set; }
         public double TotalDiscount { get; set; }
         public double NetSalary { get; set; }
-    }
-
-    public class Entry
-    {
-        public string Type { get; set; }
-        public double Value { get; set; }
-        public string Descprition { get; set; }
     }
 }

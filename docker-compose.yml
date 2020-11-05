@@ -11,7 +11,7 @@ services:
       - "5432"
     restart: always
     volumes:
-      - ./database/seed.sql :/docker-entrypoint-initdb.d/seed.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/seed.sql
     networks:
       - postgres-compose-network
       
